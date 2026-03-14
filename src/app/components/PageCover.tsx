@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { Zap } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import logoImg from "figma:asset/1a45ef0b07b8b28b42bbbaedc04d1acd371889a3.png";
+import logoImg from "@/assets/1a45ef0b07b8b28b42bbbaedc04d1acd371889a3.png";
 
 interface PageCoverProps {
   onStart: () => void;

@@ -10,7 +10,7 @@ import { PageTraceability } from "./components/PageTraceability";
 import { PageVision } from "./components/PageVision";
 import { PageDashboard } from "./components/PageDashboard";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
-import stickyLogo from "figma:asset/16786e6b4dc0ad2a714a3e4fccb975aad96fd311.png";
+import stickyLogo from "@/assets/16786e6b4dc0ad2a714a3e4fccb975aad96fd311.png";
 
 export default function App() {
   const contentRef = useRef<HTMLDivElement>(null);
