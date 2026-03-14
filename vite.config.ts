@@ -18,6 +18,13 @@ export default defineConfig({
     },
   },
 
+  build: {
+    // 降级 CSS 目标到低版本浏览器，将 oklch/oklab 转为 rgb，展开 inset 等
+    cssTarget: ['chrome70', 'safari12', 'firefox68'],
+    // 降级 JS 目标
+    target: ['chrome70', 'safari12', 'firefox68'],
+  },
+
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
 })

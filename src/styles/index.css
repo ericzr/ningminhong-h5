@@ -2,7 +2,7 @@
 @import './tailwind.css';
 @import './theme.css';
 
-/* ── 移动端全局修复 ── */
+/* ── 低版本浏览器兼容修复 ── */
 
 /* 确保 html/body 撑满全屏且不出现横向滚动 */
 html, body {
@@ -18,12 +18,24 @@ body {
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
-/* 半透明遮罩 fallback：确保渐变透明度在所有浏览器生效 */
-/* 部分旧浏览器不支持 hex+alpha (#rrggbbaa)，这里用 rgba 做兜底 */
-[class*="from-[#0a0f1e]"][class*="via-[#0a0f1e]"][class*="to-[#0a0f1e]"],
-[class*="from-[#0a0f1e]"][class*="via-[#0a0f1e]"][class*="to-[#1a0f2e]"] {
-  /* 如果 Tailwind 生成的渐变失效，用纯 CSS 兜底 */
-  background-image: var(--tw-gradient-stops, linear-gradient(to bottom, rgba(10,15,30,0.9), rgba(10,15,30,0.8), rgba(10,15,30,0.95))) !important;
+/*
+ * 修复 Tailwind v4 渐变在低版本浏览器失效的问题
+ * Tailwind v4 生成 --tw-gradient-position: to bottom in oklab
+ * "in oklab" 色彩空间插值语法在 Chrome < 111 / Safari < 16.2 中不支持
+ * 会导致整个 linear-gradient() 解析失败，遮罩完全消失
+ * 这里用 !important 覆盖为不带色彩空间的标准语法
+ */
+.bg-gradient-to-b {
+  --tw-gradient-position: to bottom !important;
+}
+.bg-gradient-to-br {
+  --tw-gradient-position: to bottom right !important;
+}
+.bg-gradient-to-r {
+  --tw-gradient-position: to right !important;
+}
+.bg-gradient-to-t {
+  --tw-gradient-position: to top !important;
 }
 
 /* 修复 fixed 定位在移动端的问题 */
