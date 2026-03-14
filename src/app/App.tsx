@@ -33,7 +33,7 @@ export default function App() {
 
   return (
     <div
-      className="relative w-full min-h-screen"
+      className="relative w-full min-h-screen overflow-x-hidden"
       style={{
         background:
           "linear-gradient(180deg, #0a0f1e 0%, #0d1225 50%, #0a0f1e 100%)",

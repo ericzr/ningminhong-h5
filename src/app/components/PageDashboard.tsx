@@ -166,7 +166,7 @@ function PlantingModule() {
 
   return (
     <DashPanel title="AI 种植监测中心" icon={Cpu} tag="实时" delay={0.1}>
-      <div className="grid grid-cols-3 gap-2.5 mb-3.5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 mb-3.5">
         {sensorMeta.map((m) => {
           const s = sensors[m.key];
           return (
@@ -523,9 +523,9 @@ function ScreenContent({ time, isFullscreen, onToggle, isMobileDirect = false }:
           { label: "酒窖库存", value: "24,400 瓶", icon: Wine, color: "#f0e6d0" },
           { label: "AI 决策/日", value: "1,284 次", icon: Cpu, color: "#6b5ce7" },
         ].map(s => (
-          <div key={s.label} className="flex items-center gap-1.5 p-2 rounded-lg border border-[#1e2640]/60" style={{ background: "rgba(10,15,30,0.7)" }}>
+          <div key={s.label} className="flex items-center gap-1.5 p-2 rounded-lg border border-[#1e2640]/60 min-w-0 overflow-hidden" style={{ background: "rgba(10,15,30,0.7)" }}>
             <s.icon className="w-3.5 h-3.5 shrink-0" style={{ color: s.color }} />
-            <div className="min-w-0">
+            <div className="min-w-0 overflow-hidden">
               <p className="text-[#5a6178] truncate" style={{ fontSize: "8px" }}>{s.label}</p>
               <p className="text-[#f0e6d0] truncate" style={{ fontSize: isFullscreen ? "13px" : "11px", fontFamily: "'Inter'" }}>{s.value}</p>
             </div>

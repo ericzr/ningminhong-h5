@@ -44,4 +44,35 @@ body {
   width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/*
+ * 强制所有 section 不产生横向溢出
+ * Tailwind v4 的 overflow-hidden 在低版本浏览器中可能因 @property 失效
+ * 这里用原生 CSS 兜底
+ */
+section {
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* 所有内容容器强制不超出视口 */
+section > div {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* grid 容器防溢出 */
+[class*="grid"] {
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* 图片防溢出 */
+img, video, canvas, svg {
+  max-width: 100%;
+  height: auto;
 }
