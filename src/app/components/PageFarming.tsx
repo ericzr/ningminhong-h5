@@ -40,7 +40,10 @@ export function PageFarming() {
           alt="精准农业"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0f1e]/93 via-[#0a0f1e]/88 to-[#0a0f1e]/95" />
+        <div
+          className="absolute inset-0 bg-gradient-to-b from-[#0a0f1e]/93 via-[#0a0f1e]/88 to-[#0a0f1e]/95"
+          style={{ background: "linear-gradient(to bottom, rgba(10,15,30,0.93), rgba(10,15,30,0.88), rgba(10,15,30,0.95))" }}
+        />
       </div>
 
       <div className="relative z-10 w-full max-w-xl mx-auto px-6">

@@ -125,7 +125,10 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    background: #0a0f1e;
+    color: #f0e6d0;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
 
   /**
@@ -135,6 +138,13 @@
 
   html {
     font-size: var(--font-size);
+    overflow-x: hidden;
+  }
+
+  /* 移动端 100vh 修复：使用 dvh 替代 vh */
+  .min-h-screen {
+    min-height: 100vh;
+    min-height: 100dvh;
   }
 
   h1 {

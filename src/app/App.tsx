@@ -33,11 +33,12 @@ export default function App() {
 
   return (
     <div
-      className="w-full min-h-screen overflow-x-hidden"
+      className="relative w-full min-h-screen"
       style={{
         background:
           "linear-gradient(180deg, #0a0f1e 0%, #0d1225 50%, #0a0f1e 100%)",
         fontFamily: "'Noto Serif SC', 'Inter', sans-serif",
+        minHeight: "100dvh",
       }}
     >
       <ParticleBackground />

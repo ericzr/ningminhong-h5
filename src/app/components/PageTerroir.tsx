@@ -18,7 +18,10 @@ export function PageTerroir() {
           alt="产区"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0a0f1e]/92 via-[#0a0f1e]/85 to-[#1a0f2e]/90" />
+        <div
+          className="absolute inset-0 bg-gradient-to-br from-[#0a0f1e]/92 via-[#0a0f1e]/85 to-[#1a0f2e]/90"
+          style={{ background: "linear-gradient(to bottom right, rgba(10,15,30,0.92), rgba(10,15,30,0.85), rgba(26,15,46,0.90))" }}
+        />
       </div>
 
       <div className="relative z-10 w-full max-w-xl mx-auto px-6">

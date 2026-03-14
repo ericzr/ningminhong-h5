@@ -175,7 +175,10 @@ export function PageBrewing() {
           alt="智慧酿造"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0f1e]/95 via-[#0a0f1e]/90 to-[#0a0f1e]/95" />
+        <div
+          className="absolute inset-0 bg-gradient-to-b from-[#0a0f1e]/95 via-[#0a0f1e]/90 to-[#0a0f1e]/95"
+          style={{ background: "linear-gradient(to bottom, rgba(10,15,30,0.95), rgba(10,15,30,0.90), rgba(10,15,30,0.95))" }}
+        />
       </div>
 
       <div className="relative z-10 w-full max-w-xl mx-auto px-6">

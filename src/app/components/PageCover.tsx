@@ -17,7 +17,10 @@ export function PageCover({ onStart }: PageCoverProps) {
           alt="贺兰山东麓葡萄园"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0f1e]/85 via-[#0a0f1e]/70 to-[#0a0f1e]/95" />
+        <div
+          className="absolute inset-0 bg-gradient-to-b from-[#0a0f1e]/85 via-[#0a0f1e]/70 to-[#0a0f1e]/95"
+          style={{ background: "linear-gradient(to bottom, rgba(10,15,30,0.85), rgba(10,15,30,0.70), rgba(10,15,30,0.95))" }}
+        />
       </div>
 
       {/* Data flow lines */}

@@ -1,3 +1,35 @@
 @import './fonts.css';
 @import './tailwind.css';
 @import './theme.css';
+
+/* ── 移动端全局修复 ── */
+
+/* 确保 html/body 撑满全屏且不出现横向滚动 */
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* 安全区域适配（iPhone 刘海屏/底部横条） */
+body {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* 半透明遮罩 fallback：确保渐变透明度在所有浏览器生效 */
+/* 部分旧浏览器不支持 hex+alpha (#rrggbbaa)，这里用 rgba 做兜底 */
+[class*="from-[#0a0f1e]"][class*="via-[#0a0f1e]"][class*="to-[#0a0f1e]"],
+[class*="from-[#0a0f1e]"][class*="via-[#0a0f1e]"][class*="to-[#1a0f2e]"] {
+  /* 如果 Tailwind 生成的渐变失效，用纯 CSS 兜底 */
+  background-image: var(--tw-gradient-stops, linear-gradient(to bottom, rgba(10,15,30,0.9), rgba(10,15,30,0.8), rgba(10,15,30,0.95))) !important;
+}
+
+/* 修复 fixed 定位在移动端的问题 */
+#root {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
