@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { Beaker, BarChart3 } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const fermentationData = [
   { day: "D1", sugar: 24.0, alcohol: 0.8 },
@@ -158,17 +158,32 @@ function CustomRadarChart() {
 export function PageBrewing() {
   const [temp, setTemp] = useState(25.3);
   const [pressure, setPressure] = useState(1.02);
+  const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTemp(25 + Math.random() * 2);
-      setPressure(1 + Math.random() * 0.05);
-    }, 3000);
-    return () => clearInterval(timer);
+    let timer: ReturnType<typeof setInterval> | null = null;
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (!timer) timer = setInterval(() => {
+            setTemp(25 + Math.random() * 2);
+            setPressure(1 + Math.random() * 0.05);
+          }, 3000);
+        } else {
+          if (timer) { clearInterval(timer); timer = null; }
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => { observer.disconnect(); if (timer) clearInterval(timer); };
   }, []);
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden py-20">
+    <section ref={sectionRef} className="relative min-h-screen flex items-center overflow-hidden py-20">
       <div className="absolute inset-0">
         <ImageWithFallback
           src="https://images.unsplash.com/photo-1710020125176-d3a105b6c5b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aW5lJTIwZmVybWVudGF0aW9uJTIwdGFuayUyMHN0YWlubGVzcyUyMHN0ZWVsJTIwd2luZXJ5fGVufDF8fHx8MTc3MzQyMTgxOXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"

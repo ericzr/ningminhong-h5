@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { Cpu, Droplets, Wind, Thermometer, Sun, Activity } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const sensorData = [
   { icon: Thermometer, label: "土壤温度", value: "22.4°C", status: "正常" },
@@ -26,14 +26,29 @@ function LiveCounter({ target, suffix = "" }: { target: number; suffix?: string 
 
 export function PageFarming() {
   const [activeSensor, setActiveSensor] = useState(0);
+  const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const timer = setInterval(() => setActiveSensor((s) => (s + 1) % sensorData.length), 2500);
-    return () => clearInterval(timer);
+    let timer: ReturnType<typeof setInterval> | null = null;
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (!timer) timer = setInterval(() => setActiveSensor((s) => (s + 1) % sensorData.length), 2500);
+        } else {
+          if (timer) { clearInterval(timer); timer = null; }
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => { observer.disconnect(); if (timer) clearInterval(timer); };
   }, []);
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden py-20">
+    <section ref={sectionRef} className="relative min-h-screen flex items-center overflow-hidden py-20">
       <div className="absolute inset-0">
         <ImageWithFallback
           src="https://images.unsplash.com/photo-1654643352875-127916dec2de?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkcm9uZSUyMGFncmljdWx0dXJlJTIwcHJlY2lzaW9uJTIwZmFybWluZyUyMHZpbmV5YXJkfGVufDF8fHx8MTc3MzQyMTgxOHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"

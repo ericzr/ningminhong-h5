@@ -10,6 +10,10 @@ export function ParticleBackground() {
     if (!ctx) return;
 
     let animationId: number;
+    let isScrolling = false;
+    let scrollTimer: ReturnType<typeof setTimeout>;
+    const PARTICLE_COUNT = 30; // 从 60 减少到 30
+    const CONNECT_DIST = 80;  // 从 120 减少到 80
     const particles: { x: number; y: number; vx: number; vy: number; size: number; alpha: number }[] = [];
 
     const resize = () => {
@@ -19,7 +23,15 @@ export function ParticleBackground() {
     resize();
     window.addEventListener("resize", resize);
 
-    for (let i = 0; i < 60; i++) {
+    // 滚动时暂停动画，停止滚动 150ms 后恢复
+    const handleScroll = () => {
+      isScrolling = true;
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => { isScrolling = false; }, 150);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
@@ -31,6 +43,11 @@ export function ParticleBackground() {
     }
 
     const animate = () => {
+      animationId = requestAnimationFrame(animate);
+
+      // 滚动期间跳过绘制，释放主线程给滚动
+      if (isScrolling) return;
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       particles.forEach((p) => {
         p.x += p.vx;
@@ -52,23 +69,24 @@ export function ParticleBackground() {
           const dx = particles[i].x - particles[j].x;
           const dy = particles[i].y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
+          if (dist < CONNECT_DIST) {
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(192, 168, 110, ${0.08 * (1 - dist / 120)})`;
+            ctx.strokeStyle = `rgba(192, 168, 110, ${0.08 * (1 - dist / CONNECT_DIST)})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
         }
       }
-      animationId = requestAnimationFrame(animate);
     };
     animate();
 
     return () => {
       cancelAnimationFrame(animationId);
+      clearTimeout(scrollTimer);
       window.removeEventListener("resize", resize);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 

@@ -71,8 +71,15 @@ section > div {
   box-sizing: border-box;
 }
 
-/* 图片防溢出 */
-img, video, canvas, svg {
+/* 图片防溢出（排除用作背景铺满的 object-cover 图片） */
+img:not([class*="object-cover"]),
+video, canvas, svg {
   max-width: 100%;
   height: auto;
+}
+
+/* 确保 object-cover 图片能正确铺满父容器 */
+img.object-cover {
+  width: 100%;
+  height: 100%;
 }

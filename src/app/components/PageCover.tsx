@@ -25,12 +25,12 @@ export function PageCover({ onStart }: PageCoverProps) {
 
       {/* Data flow lines */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(8)].map((_, i) => (
+        {[...Array(4)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute h-px bg-gradient-to-r from-transparent via-[#c0a86e]/30 to-transparent"
             style={{
-              top: `${15 + i * 10}%`,
+              top: `${15 + i * 20}%`,
               left: 0,
               right: 0,
             }}
@@ -47,12 +47,12 @@ export function PageCover({ onStart }: PageCoverProps) {
           />
         ))}
         {/* Vertical code rain effect */}
-        {[...Array(12)].map((_, i) => (
+        {[...Array(6)].map((_, i) => (
           <motion.div
             key={`v-${i}`}
             className="absolute w-px bg-gradient-to-b from-transparent via-[#6b5ce7]/20 to-transparent"
             style={{
-              left: `${8 + i * 8}%`,
+              left: `${8 + i * 16}%`,
               top: 0,
               height: "60%",
             }}

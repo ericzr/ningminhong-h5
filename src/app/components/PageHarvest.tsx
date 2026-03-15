@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { Eye, Scan, Check, X } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const sortingItems = [
   { id: 1, label: "成熟果", quality: "A+", pass: true, sugar: "24.2°Bx", color: "#4ade80" },
@@ -14,18 +14,33 @@ const sortingItems = [
 
 export function PageHarvest() {
   const [currentItem, setCurrentItem] = useState(0);
+  const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentItem((c) => (c + 1) % sortingItems.length);
-    }, 1800);
-    return () => clearInterval(timer);
+    let timer: ReturnType<typeof setInterval> | null = null;
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (!timer) timer = setInterval(() => {
+            setCurrentItem((c) => (c + 1) % sortingItems.length);
+          }, 1800);
+        } else {
+          if (timer) { clearInterval(timer); timer = null; }
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => { observer.disconnect(); if (timer) clearInterval(timer); };
   }, []);
 
   const item = sortingItems[currentItem];
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden py-20">
+    <section ref={sectionRef} className="relative min-h-screen flex items-center overflow-hidden py-20">
       <div className="absolute inset-0">
         <ImageWithFallback
           src="https://images.unsplash.com/photo-1582772168790-9e7441942224?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyb2JvdGljJTIwYXJtJTIwaGFydmVzdCUyMGF1dG9tYXRpb24lMjB0ZWNobm9sb2d5fGVufDF8fHx8MTc3MzQyMTgxOXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"

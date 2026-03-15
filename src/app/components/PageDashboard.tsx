@@ -16,6 +16,32 @@ interface SensorReading {
   trend: "up" | "down" | "stable";
 }
 
+/** setInterval that auto-pauses when the host element is off-screen */
+function useVisibleInterval(
+  callback: () => void,
+  delay: number,
+  containerRef: React.RefObject<HTMLElement | null>,
+) {
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    let timer: ReturnType<typeof setInterval> | null = null;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (!timer) timer = setInterval(callback, delay);
+        } else {
+          if (timer) { clearInterval(timer); timer = null; }
+        }
+      },
+      { threshold: 0.05 },
+    );
+    observer.observe(el);
+    return () => { observer.disconnect(); if (timer) clearInterval(timer); };
+  }, [callback, delay, containerRef]);
+}
+
 function statusColor(s: "normal" | "warning" | "critical") {
   return s === "normal" ? "#4ade80" : s === "warning" ? "#facc15" : "#ef4444";
 }
@@ -125,7 +151,7 @@ function DashPanel({ title, icon: Icon, tag, children, className = "", delay = 0
 }
 
 // ─── 1. AI Planting Monitor ───
-function PlantingModule() {
+function PlantingModule({ containerRef }: { containerRef: React.RefObject<HTMLElement | null> }) {
   const [sensors, setSensors] = useState<Record<string, SensorReading>>({
     soilTemp: { value: 22.4, unit: "°C", status: "normal", trend: "stable" },
     soilMoisture: { value: 68.2, unit: "%", status: "normal", trend: "up" },
@@ -137,23 +163,21 @@ function PlantingModule() {
   const [tempHistory, setTempHistory] = useState<number[]>([22.1, 22.4, 22.3, 22.8, 22.5, 22.4, 22.6, 22.9, 23.1, 22.7]);
   const [moistHistory, setMoistHistory] = useState<number[]>([65, 66, 67, 68, 67.5, 68, 69, 68.2, 67.8, 68.5]);
 
-  useEffect(() => {
-    const t = setInterval(() => {
-      const newTemp = randomInRange(21, 24);
-      const newMoist = randomInRange(64, 72);
-      setSensors({
-        soilTemp: { value: newTemp, unit: "°C", status: newTemp > 23.5 ? "warning" : "normal", trend: newTemp > 22.5 ? "up" : "down" },
-        soilMoisture: { value: newMoist, unit: "%", status: newMoist > 70 ? "warning" : "normal", trend: newMoist > 68 ? "up" : "down" },
-        light: { value: randomInRange(600, 1000, 0), unit: "lux", status: "normal", trend: "stable" },
-        wind: { value: randomInRange(1, 4), unit: "m/s", status: "normal", trend: "stable" },
-        ph: { value: randomInRange(6.8, 7.6), unit: "pH", status: "normal", trend: "stable" },
-        ndvi: { value: randomInRange(0.7, 0.9, 2), unit: "", status: "normal", trend: "up" },
-      });
-      setTempHistory(h => [...h.slice(-9), newTemp]);
-      setMoistHistory(h => [...h.slice(-9), newMoist]);
-    }, 2500);
-    return () => clearInterval(t);
+  const tick = useCallback(() => {
+    const newTemp = randomInRange(21, 24);
+    const newMoist = randomInRange(64, 72);
+    setSensors({
+      soilTemp: { value: newTemp, unit: "°C", status: newTemp > 23.5 ? "warning" : "normal", trend: newTemp > 22.5 ? "up" : "down" },
+      soilMoisture: { value: newMoist, unit: "%", status: newMoist > 70 ? "warning" : "normal", trend: newMoist > 68 ? "up" : "down" },
+      light: { value: randomInRange(600, 1000, 0), unit: "lux", status: "normal", trend: "stable" },
+      wind: { value: randomInRange(1, 4), unit: "m/s", status: "normal", trend: "stable" },
+      ph: { value: randomInRange(6.8, 7.6), unit: "pH", status: "normal", trend: "stable" },
+      ndvi: { value: randomInRange(0.7, 0.9, 2), unit: "", status: "normal", trend: "up" },
+    });
+    setTempHistory(h => [...h.slice(-9), newTemp]);
+    setMoistHistory(h => [...h.slice(-9), newMoist]);
   }, []);
+  useVisibleInterval(tick, 2500, containerRef);
 
   const sensorMeta = [
     { key: "soilTemp", icon: Thermometer, label: "土壤温度" },
@@ -220,7 +244,7 @@ function PlantingModule() {
 }
 
 // ─── 2. Robot Harvest Demo ───
-function HarvestModule() {
+function HarvestModule({ containerRef }: { containerRef: React.RefObject<HTMLElement | null> }) {
   const [robotStats, setRobotStats] = useState({
     active: 6, total: 8, harvested: 12480, speed: 1.2, accuracy: 99.2,
   });
@@ -231,18 +255,16 @@ function HarvestModule() {
   ];
   const [scanIdx, setScanIdx] = useState(0);
 
-  useEffect(() => {
-    const t = setInterval(() => {
-      setRobotStats(prev => ({
-        ...prev,
-        harvested: prev.harvested + Math.floor(Math.random() * 5),
-        speed: randomInRange(1.0, 1.5),
-        accuracy: randomInRange(98.5, 99.8),
-      }));
-      setScanIdx(i => (i + 1) % 3);
-    }, 2000);
-    return () => clearInterval(t);
+  const tick = useCallback(() => {
+    setRobotStats(prev => ({
+      ...prev,
+      harvested: prev.harvested + Math.floor(Math.random() * 5),
+      speed: randomInRange(1.0, 1.5),
+      accuracy: randomInRange(98.5, 99.8),
+    }));
+    setScanIdx(i => (i + 1) % 3);
   }, []);
+  useVisibleInterval(tick, 2000, containerRef);
 
   const current = sortQueue[scanIdx];
 
@@ -295,7 +317,7 @@ function HarvestModule() {
 }
 
 // ─── 3. Digital Wine Cellar ───
-function CellarModule() {
+function CellarModule({ containerRef }: { containerRef: React.RefObject<HTMLElement | null> }) {
   const [barrels, setBarrels] = useState([
     { id: "OAK-A01", type: "法国橡木桶", age: 186, temp: 14.2, humidity: 72, fill: 95, vintage: "2025" },
     { id: "OAK-A02", type: "美国橡木桶", age: 124, temp: 14.5, humidity: 71, fill: 88, vintage: "2025" },
@@ -304,12 +326,10 @@ function CellarModule() {
   ]);
   const [selectedBarrel, setSelectedBarrel] = useState(0);
 
-  useEffect(() => {
-    const t = setInterval(() => {
-      setBarrels(prev => prev.map(b => ({ ...b, temp: randomInRange(13.5, 15, 1), humidity: randomInRange(69, 75, 0) })));
-    }, 3000);
-    return () => clearInterval(t);
+  const tick = useCallback(() => {
+    setBarrels(prev => prev.map(b => ({ ...b, temp: randomInRange(13.5, 15, 1), humidity: randomInRange(69, 75, 0) })));
   }, []);
+  useVisibleInterval(tick, 3000, containerRef);
 
   const sel = barrels[selectedBarrel];
 
@@ -354,7 +374,7 @@ function CellarModule() {
 }
 
 // ─── 4. Brewing Monitor ───
-function BrewingModule() {
+function BrewingModule({ containerRef }: { containerRef: React.RefObject<HTMLElement | null> }) {
   const [tanks, setTanks] = useState([
     { id: "T-01", stage: "主发酵", day: 5, temp: 25.3, sugar: 14.5, alcohol: 6.2, co2: 1.02, status: "active" as const },
     { id: "T-02", stage: "苹乳发酵", day: 18, temp: 18.1, sugar: 0.8, alcohol: 13.5, co2: 0.42, status: "active" as const },
@@ -363,17 +383,15 @@ function BrewingModule() {
   const [activeTank, setActiveTank] = useState(0);
   const [fermentHistory, setFermentHistory] = useState<number[]>([24, 22.1, 19.8, 17.2, 14.5]);
 
-  useEffect(() => {
-    const t = setInterval(() => {
-      setTanks(prev => prev.map(tank => ({
-        ...tank,
-        temp: tank.stage === "冷稳定" ? randomInRange(-3, -1) : randomInRange(tank.stage === "主发酵" ? 24 : 17, tank.stage === "主发酵" ? 27 : 19),
-        co2: randomInRange(0.1, 1.2),
-      })));
-      setFermentHistory(h => [...h.slice(-7), randomInRange(3, 24)]);
-    }, 2500);
-    return () => clearInterval(t);
+  const tick = useCallback(() => {
+    setTanks(prev => prev.map(tank => ({
+      ...tank,
+      temp: tank.stage === "冷稳定" ? randomInRange(-3, -1) : randomInRange(tank.stage === "主发酵" ? 24 : 17, tank.stage === "主发酵" ? 27 : 19),
+      co2: randomInRange(0.1, 1.2),
+    })));
+    setFermentHistory(h => [...h.slice(-7), randomInRange(3, 24)]);
   }, []);
+  useVisibleInterval(tick, 2500, containerRef);
 
   const tank = tanks[activeTank];
 
@@ -413,7 +431,7 @@ function BrewingModule() {
 }
 
 // ─── 5. Storage Monitor ───
-function StorageModule() {
+function StorageModule({ containerRef }: { containerRef: React.RefObject<HTMLElement | null> }) {
   const [zones, setZones] = useState([
     { name: "A区 · 恒温窖", temp: 14.2, humidity: 72, bottles: 12800, capacity: 15000, status: "normal" as const },
     { name: "B区 · 陈年窖", temp: 13.5, humidity: 74, bottles: 8400, capacity: 10000, status: "normal" as const },
@@ -425,16 +443,14 @@ function StorageModule() {
     { time: "09:45", msg: "全区域环境检测通过", level: "normal" as const },
   ];
 
-  useEffect(() => {
-    const t = setInterval(() => {
-      setZones(prev => prev.map(z => ({
-        ...z,
-        temp: randomInRange(z.name.includes("陈年") ? 13 : z.name.includes("待出") ? 15 : 13.5, z.name.includes("待出") ? 17 : 15),
-        humidity: randomInRange(64, 76, 0),
-      })));
-    }, 3500);
-    return () => clearInterval(t);
+  const tick = useCallback(() => {
+    setZones(prev => prev.map(z => ({
+      ...z,
+      temp: randomInRange(z.name.includes("陈年") ? 13 : z.name.includes("待出") ? 15 : 13.5, z.name.includes("待出") ? 17 : 15),
+      humidity: randomInRange(64, 76, 0),
+    })));
   }, []);
+  useVisibleInterval(tick, 3500, containerRef);
 
   return (
     <DashPanel title="储存环境监测" icon={Warehouse} tag="24/7" delay={0.5}>
@@ -476,7 +492,7 @@ function StorageModule() {
 }
 
 // ─── Screen content (shared between mockup and fullscreen) ───
-function ScreenContent({ time, isFullscreen, onToggle, isMobileDirect = false }: { time: Date; isFullscreen: boolean; onToggle: () => void; isMobileDirect?: boolean }) {
+function ScreenContent({ time, isFullscreen, onToggle, isMobileDirect = false, containerRef }: { time: Date; isFullscreen: boolean; onToggle: () => void; isMobileDirect?: boolean; containerRef: React.RefObject<HTMLElement | null> }) {
   return (
     <div className={`w-full ${isFullscreen ? "p-4 md:p-10" : isMobileDirect ? "p-0" : "p-4 md:p-6"}`}>
       <div className="flex items-center justify-between mb-3 md:mb-4 gap-2">
@@ -534,11 +550,11 @@ function ScreenContent({ time, isFullscreen, onToggle, isMobileDirect = false }:
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-min">
-        <div><PlantingModule /></div>
-        <div><HarvestModule /></div>
-        <div><CellarModule /></div>
-        <div className="sm:col-span-2"><BrewingModule /></div>
-        <div><StorageModule /></div>
+        <div><PlantingModule containerRef={containerRef} /></div>
+        <div><HarvestModule containerRef={containerRef} /></div>
+        <div><CellarModule containerRef={containerRef} /></div>
+        <div className="sm:col-span-2"><BrewingModule containerRef={containerRef} /></div>
+        <div><StorageModule containerRef={containerRef} /></div>
       </div>
 
       <div className="mt-3 text-center">
@@ -554,11 +570,10 @@ export function PageDashboard() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const mockupRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
 
-  useEffect(() => {
-    const t = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(t);
-  }, []);
+  const timeTick = useCallback(() => setTime(new Date()), []);
+  useVisibleInterval(timeTick, 1000, sectionRef);
 
   useEffect(() => {
     if (!isFullscreen) return;
@@ -588,7 +603,7 @@ export function PageDashboard() {
 
   return (
     <>
-      <section className="relative flex flex-col items-center justify-center overflow-hidden py-12 md:py-20">
+      <section ref={sectionRef} className="relative flex flex-col items-center justify-center overflow-hidden py-12 md:py-20">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0f1e] via-[#060a18] to-[#0a0f1e]" />
 
         <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6">
@@ -616,7 +631,7 @@ export function PageDashboard() {
               <div className="relative overflow-hidden" style={{ background: "linear-gradient(180deg, #060a18 0%, #0a0f1e 50%, #060a18 100%)" }}>
                 <div className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{ backgroundImage: "linear-gradient(rgba(107,92,231,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(107,92,231,0.5) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
                 <div className="relative p-4">
-                  <ScreenContent time={time} isFullscreen={false} onToggle={toggleFs} isMobileDirect />
+                  <ScreenContent time={time} isFullscreen={false} onToggle={toggleFs} isMobileDirect containerRef={sectionRef} />
                 </div>
               </div>
             </motion.div>
@@ -666,7 +681,7 @@ export function PageDashboard() {
                 <div className="relative overflow-y-auto overflow-x-hidden" style={{ background: "linear-gradient(180deg, #060a18 0%, #0a0f1e 50%, #060a18 100%)", maxHeight: "65vh" }}>
                   <div className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{ backgroundImage: "linear-gradient(rgba(107,92,231,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(107,92,231,0.5) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
                   <div className="relative">
-                    <ScreenContent time={time} isFullscreen={false} onToggle={toggleFs} />
+                    <ScreenContent time={time} isFullscreen={false} onToggle={toggleFs} containerRef={sectionRef} />
                   </div>
                 </div>
               </div>
@@ -710,7 +725,7 @@ export function PageDashboard() {
             </div>
             <div className="relative z-10 flex-1 overflow-y-auto overflow-x-hidden">
               <div className="max-w-7xl mx-auto">
-                <ScreenContent time={time} isFullscreen={true} onToggle={toggleFs} />
+                <ScreenContent time={time} isFullscreen={true} onToggle={toggleFs} containerRef={sectionRef} />
               </div>
             </div>
           </motion.div>
